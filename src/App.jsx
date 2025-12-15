@@ -423,6 +423,7 @@ const TaskItem = ({
   onDragOver,
   onDrop,
   isDragging,
+  customActionIcon,
 }) => {
   const progress =
     !task.steps || task.steps.length === 0
@@ -449,7 +450,7 @@ const TaskItem = ({
       onDrop={onDrop}
     >
       <div className="flex flex-col gap-2">
-        {/* Row 1: Checkbox + Title + Star + Drag */}
+        {/* Row 1: Checkbox + Title + Star/Action + Drag */}
         <div className="flex items-start gap-3">
           <button
             onClick={(e) => {
@@ -484,21 +485,25 @@ const TaskItem = ({
             </span>
           </div>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite(task.id);
-            }}
-            className="focus:outline-none transition-transform active:scale-90 p-1 rounded-full hover:bg-slate-100 shrink-0"
-          >
-            <Star
-              className={`w-5 h-5 ${
-                task.isFavorite
-                  ? "fill-amber-400 text-amber-400"
-                  : "text-slate-300"
-              }`}
-            />
-          </button>
+          {customActionIcon ? (
+            <div onClick={(e) => e.stopPropagation()}>{customActionIcon}</div>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(task.id);
+              }}
+              className="focus:outline-none transition-transform active:scale-90 p-1 rounded-full hover:bg-slate-100 shrink-0"
+            >
+              <Star
+                className={`w-5 h-5 ${
+                  task.isFavorite
+                    ? "fill-amber-400 text-amber-400"
+                    : "text-slate-300"
+                }`}
+              />
+            </button>
+          )}
 
           {isDraggable && (
             <div className="mt-1 cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
@@ -571,7 +576,7 @@ const INITIAL_DATA = {
 
 export default function LifeOS() {
   const [data, setData] = useState(() => {
-    const saved = localStorage.getItem("lifeos_v9_5_data"); // Updated key
+    const saved = localStorage.getItem("lifeos_v9_6_data"); // Updated key
     return saved ? JSON.parse(saved) : INITIAL_DATA;
   });
 
@@ -592,7 +597,7 @@ export default function LifeOS() {
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
   useEffect(() => {
-    localStorage.setItem("lifeos_v9_5_data", JSON.stringify(data));
+    localStorage.setItem("lifeos_v9_6_data", JSON.stringify(data));
   }, [data]);
 
   // --- ACTIONS ---
@@ -718,8 +723,8 @@ export default function LifeOS() {
       id: Date.now().toString(),
       title,
       goalId,
-      active: true,
-      status: "active",
+      active: false,
+      status: "incubator",
     };
     setData((prev) => ({ ...prev, projects: [...prev.projects, newProject] }));
   };
@@ -882,7 +887,6 @@ export default function LifeOS() {
             total: task.steps.length,
           };
 
-    // UX Helper for Focus inside Modal
     const handleInputFocus = (e) => {
       setTimeout(() => {
         e.target.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1149,7 +1153,6 @@ export default function LifeOS() {
     );
   };
 
-  // --- Delete Category Modal ---
   const DeleteCategoryConfirmationModal = () => {
     if (!categoryToDelete) return null;
     return (
@@ -1331,16 +1334,28 @@ export default function LifeOS() {
               ) : (
                 <div className="space-y-2 overflow-y-auto pr-1 pb-20">
                   {inboxTasks.map((t) => (
-                    <button
+                    <TaskItem
                       key={t.id}
-                      onClick={() => setProcessingTask(t)}
-                      className="w-full text-left p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-100 rounded-lg group transition-colors flex justify-between items-center"
-                    >
-                      <span className="font-medium text-slate-700">
-                        {t.title}
-                      </span>
-                      <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-500" />
-                    </button>
+                      task={t}
+                      projects={[]}
+                      goals={[]}
+                      onToggle={toggleTask}
+                      onClick={(t) => setSelectedTask(t)} // Edit on Click
+                      onToggleFavorite={toggleFavorite}
+                      showContextTags={false}
+                      showTodayStatus={false}
+                      customActionIcon={
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProcessingTask(t);
+                          }} // Process on Arrow Click
+                          className="p-1 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+                        >
+                          <ArrowRight className="w-5 h-5" />
+                        </button>
+                      }
+                    />
                   ))}
                 </div>
               )}
@@ -1430,6 +1445,167 @@ export default function LifeOS() {
             </div>
           )}
         </Card>
+      </div>
+    );
+  };
+
+  const GoalDetailsModal = () => {
+    if (!goalModal) return null;
+    const goal = data.goals.find((g) => g.id === goalModal);
+    const goalProjects = data.projects.filter((p) => p.goalId === goalModal);
+    const [isAddingProject, setIsAddingProject] = useState(false);
+
+    return (
+      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4">
+        <div className="bg-slate-50 w-full max-w-2xl h-[90vh] sm:h-auto sm:max-h-[85vh] sm:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col animate-in slide-in-from-bottom duration-300">
+          {/* Header */}
+          <div className="bg-white p-6 rounded-t-2xl border-b border-slate-200 flex justify-between items-start shrink-0">
+            <div className="flex-1 mr-4">
+              {/* Top Row: Title & Category */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0 mr-4">
+                  <Target className="w-5 h-5 text-indigo-600 shrink-0" />
+                  <AutoSaveInput
+                    value={goal.title}
+                    onSave={(val) => updateGoal(goal.id, { title: val })}
+                    className="text-2xl font-bold text-slate-800 bg-transparent border-none p-0 w-full truncate"
+                  />
+                </div>
+
+                {/* Category Selector */}
+                <select
+                  value={goal.category || ""}
+                  onChange={(e) =>
+                    updateGoal(goal.id, { category: e.target.value })
+                  }
+                  className="text-xs bg-slate-100 border border-slate-200 rounded px-2 py-1.5 text-slate-600 font-bold uppercase tracking-wide focus:outline-none cursor-pointer hover:bg-slate-200 transition-colors shrink-0"
+                >
+                  {data.categories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                  <option value="Sin Categoría">Sin Categoría</option>
+                </select>
+              </div>
+
+              <AutoSaveInput
+                value={goal.description}
+                onSave={(val) => updateGoal(goal.id, { description: val })}
+                className="text-slate-500 w-full bg-transparent border-none p-0"
+                placeholder="Descripción de la meta..."
+              />
+            </div>
+            <button
+              onClick={() => setGoalModal(null)}
+              className="p-2 hover:bg-slate-100 rounded-full"
+            >
+              <X className="w-6 h-6 text-slate-400" />
+            </button>
+          </div>
+
+          {/* Body */}
+          <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/50">
+            {/* Projects List */}
+            {goalProjects.map((project) => {
+              const projectTasks = data.tasks.filter(
+                (t) => t.projectId === project.id && t.status !== "deleted"
+              );
+              const sortedTasks = [
+                ...projectTasks.filter((t) => !t.completed),
+                ...projectTasks.filter((t) => t.completed),
+              ];
+
+              return (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  tasks={sortedTasks}
+                  onUpdateProject={(updates) =>
+                    updateProject(project.id, updates)
+                  }
+                  onDeleteProject={() => requestDeleteProject(project.id)} // Fixed: Using requestDeleteProject
+                  onToggleStatus={() =>
+                    updateProject(project.id, {
+                      status:
+                        project.status === "active" ? "incubator" : "active",
+                    })
+                  }
+                  onAddTask={(title) => {
+                    const newTask = {
+                      id: Date.now().toString(),
+                      title,
+                      type: "project",
+                      projectId: project.id,
+                      status: "pending",
+                      completed: false,
+                      steps: [],
+                      isFavorite: false,
+                    };
+                    setData((prev) => ({
+                      ...prev,
+                      tasks: [...prev.tasks, newTask],
+                    }));
+                  }}
+                  onTaskToggle={toggleTask}
+                  onTaskClick={(t) => setSelectedTask(t)}
+                  onTaskFavorite={toggleFavorite}
+                  onReorderTasks={(from, to) =>
+                    reorderProjectTasks(project.id, from, to)
+                  }
+                />
+              );
+            })}
+
+            {/* Add Project Section */}
+            {isAddingProject ? (
+              <Card className="p-4 animate-in fade-in">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const val = e.target.elements.projTitle.value.trim();
+                    if (val) {
+                      addProject(val, goal.id);
+                      setIsAddingProject(false);
+                    }
+                  }}
+                >
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-2">
+                    Nuevo Proyecto
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      name="projTitle"
+                      autoFocus
+                      placeholder="Nombre del proyecto..."
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-700"
+                    >
+                      Crear
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingProject(false)}
+                      className="bg-white border border-slate-200 text-slate-500 px-4 py-2 rounded-lg font-bold hover:bg-slate-50"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              </Card>
+            ) : (
+              <button
+                onClick={() => setIsAddingProject(true)}
+                className="w-full py-4 border-2 border-dashed border-slate-300 rounded-xl text-slate-400 font-bold hover:border-indigo-400 hover:text-indigo-500 transition-colors flex items-center justify-center gap-2"
+              >
+                <Plus className="w-5 h-5" /> Añadir Nuevo Proyecto
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     );
   };
@@ -1663,6 +1839,7 @@ export default function LifeOS() {
                 <div className="flex gap-2">
                   <select
                     name="cat"
+                    defaultValue="Sin Categoría"
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   >
                     {data.categories.map((c) => (
