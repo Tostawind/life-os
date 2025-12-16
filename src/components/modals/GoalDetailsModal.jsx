@@ -38,20 +38,25 @@ const GoalDetailsModal = ({
                                     className="text-xl md:text-2xl font-bold text-slate-800 bg-transparent border-none p-0 w-full"
                                 />
                             </div>
-                            <select
-                                value={goal.category || ""}
-                                onChange={(e) =>
-                                    updateGoal(goal.id, { category: e.target.value })
-                                }
-                                className="text-xs bg-slate-100 border border-slate-200 rounded px-2 py-1.5 text-slate-600 font-bold uppercase tracking-wide focus:outline-none cursor-pointer hover:bg-slate-200 transition-colors shrink-0 w-fit md:w-auto"
-                            >
-                                {data.categories.map((c) => (
-                                    <option key={c} value={c}>
-                                        {c}
-                                    </option>
-                                ))}
-                                <option value="Sin Categoría">Sin Categoría</option>
-                            </select>
+                            <div className="relative shrink-0 w-fit md:w-auto">
+                                <select
+                                    value={goal.category || ""}
+                                    onChange={(e) =>
+                                        updateGoal(goal.id, { category: e.target.value })
+                                    }
+                                    className="appearance-none pl-3 pr-8 py-1.5 text-xs font-bold uppercase tracking-wide bg-slate-100 text-slate-600 rounded-full border border-slate-200 hover:bg-slate-200 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer w-full"
+                                >
+                                    {data.categories.map((c) => (
+                                        <option key={c} value={c}>
+                                            {c}
+                                        </option>
+                                    ))}
+                                    <option value="Sin Categoría">Sin Categoría</option>
+                                </select>
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                </div>
+                            </div>
                         </div>
                         <AutoSaveInput
                             value={goal.description}

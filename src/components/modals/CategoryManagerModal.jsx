@@ -10,6 +10,7 @@ import {
     Download,
     Upload,
     AlertTriangle,
+    HelpCircle,
 } from "lucide-react";
 import Card from "../ui/Card";
 
@@ -30,6 +31,7 @@ const CategoryManagerModal = ({
     handleExport,
     handleImportRequest, // Expects onChange event
     requestHardReset,
+    onOpenSystemExplanation,
 }) => {
     if (!isOpen) return null;
     const [newCat, setNewCat] = useState("");
@@ -106,7 +108,7 @@ const CategoryManagerModal = ({
                                                     <span className="text-sm font-medium text-slate-700">
                                                         {cat}
                                                     </span>
-                                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="flex gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                         <button
                                                             onClick={() =>
                                                                 setEditingCat({ original: cat, current: cat })
@@ -156,6 +158,19 @@ const CategoryManagerModal = ({
 
                     <div className="mb-6">
                         <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">
+                            Recursos
+                        </h4>
+                        <button
+                            onClick={onOpenSystemExplanation}
+                            className="w-full flex items-center justify-between p-3 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-700 font-bold hover:bg-indigo-100 transition-colors mb-2"
+                        >
+                            <span className="flex items-center gap-2"><HelpCircle className="w-4 h-4" /> Cómo funciona el sistema</span>
+                            <ChevronRight className="w-4 h-4 opacity-50" />
+                        </button>
+                    </div>
+
+                    <div className="mb-6">
+                        <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">
                             Datos y Seguridad
                         </h4>
                         <div className="grid grid-cols-2 gap-3 mb-3">
@@ -164,11 +179,11 @@ const CategoryManagerModal = ({
                                 className="flex flex-col items-center justify-center gap-1 p-3 bg-slate-50 border border-slate-200 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition-colors"
                             >
                                 <Download className="w-5 h-5 mb-1" />
-                                <span className="text-xs font-bold">Exportar Copia</span>
+                                <span className="text-xs font-bold">Descargar Datos</span>
                             </button>
                             <label className="flex flex-col items-center justify-center gap-1 p-3 bg-slate-50 border border-slate-200 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition-colors cursor-pointer">
                                 <Upload className="w-5 h-5 mb-1" />
-                                <span className="text-xs font-bold">Restaurar Copia</span>
+                                <span className="text-xs font-bold">Cargar Datos</span>
                                 <input
                                     type="file"
                                     onChange={handleImportRequest}
@@ -187,7 +202,7 @@ const CategoryManagerModal = ({
                             onClick={requestHardReset}
                             className="w-full flex items-center justify-center gap-2 p-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 font-bold hover:bg-rose-100 transition-colors"
                         >
-                            <AlertTriangle className="w-4 h-4" /> Hard Reset (Borrar Todo)
+                            <AlertTriangle className="w-4 h-4" /> Hard Reset
                         </button>
                     </div>
                 </div>

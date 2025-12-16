@@ -65,18 +65,23 @@ const AddGoalModal = ({
                                 Categoría
                             </label>
                             <div className="flex gap-2">
-                                <select
-                                    name="cat"
-                                    defaultValue="Sin Categoría"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                >
-                                    {data.categories.map((c) => (
-                                        <option key={c} value={c}>
-                                            {c}
-                                        </option>
-                                    ))}
-                                    <option value="Sin Categoría">Sin Categoría</option>
-                                </select>
+                                <div className="relative w-full">
+                                    <select
+                                        name="cat"
+                                        defaultValue="Sin Categoría"
+                                        className="appearance-none w-full bg-slate-50 border border-slate-200 rounded-lg pl-3 pr-8 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-600 font-medium"
+                                    >
+                                        {data.categories.map((c) => (
+                                            <option key={c} value={c}>
+                                                {c}
+                                            </option>
+                                        ))}
+                                        <option value="Sin Categoría">Sin Categoría</option>
+                                    </select>
+                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                    </div>
+                                </div>
                                 <button
                                     type="button"
                                     onClick={onOpenCategoryManager}

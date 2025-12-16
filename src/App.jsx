@@ -34,6 +34,7 @@ import {
   ResetConfirmModal,
   ImportConfirmModal,
 } from "./components/modals/DeleteModals";
+import SystemExplanationModal from "./components/modals/SystemExplanationModal";
 
 // UX Helper for Focus (used in inline form)
 const handleInputFocus = (e) => {
@@ -61,12 +62,19 @@ export default function LifeOS() {
     isAddGoalModalOpen,
     setIsAddGoalModalOpen,
     taskToDelete,
+    setTaskToDelete,
     projectToDelete,
+    setProjectToDelete,
     showResetConfirm,
+    setShowResetConfirm,
     pendingImportData,
+    setPendingImportData,
     isCategoryManagerOpen,
     setIsCategoryManagerOpen,
     categoryToDelete,
+    setCategoryToDelete,
+    isSystemExplanationOpen,
+    setIsSystemExplanationOpen,
     actions,
   } = useLifeOS();
 
@@ -78,7 +86,6 @@ export default function LifeOS() {
     toggleFavorite,
     requestDeleteTask,
     confirmDeleteTask,
-    setTaskToDelete,
     addStep,
     updateStep,
     deleteStep,
@@ -90,20 +97,16 @@ export default function LifeOS() {
     updateProject,
     requestDeleteProject,
     confirmDeleteProject,
-    setProjectToDelete,
     addCategory,
     updateCategory,
     requestDeleteCategory,
     confirmDeleteCategory,
-    setCategoryToDelete,
     processTaskAction,
     getGoalProgress,
     handleExport,
     confirmImport,
     requestHardReset,
     confirmHardReset,
-    setPendingImportData,
-    setShowResetConfirm,
     getFilteredTasks,
   } = actions;
 
@@ -506,6 +509,7 @@ export default function LifeOS() {
         handleExport={handleExport}
         handleImportRequest={handleImportRequest}
         requestHardReset={requestHardReset}
+        onOpenSystemExplanation={() => setIsSystemExplanationOpen(true)}
       />
 
       {showResetConfirm && (
@@ -520,6 +524,11 @@ export default function LifeOS() {
           onCancel={() => setPendingImportData(null)}
         />
       )}
+
+      <SystemExplanationModal
+        isOpen={isSystemExplanationOpen}
+        onClose={() => setIsSystemExplanationOpen(false)}
+      />
     </div>
   );
 }

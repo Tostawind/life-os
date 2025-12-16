@@ -28,6 +28,7 @@ export function useLifeOS() {
     const [pendingImportData, setPendingImportData] = useState(null);
     const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
+    const [isSystemExplanationOpen, setIsSystemExplanationOpen] = useState(false);
 
     useEffect(() => {
         localStorage.setItem("lifeos_v9_6_data", JSON.stringify(data));
@@ -326,6 +327,8 @@ export function useLifeOS() {
         setIsCategoryManagerOpen,
         categoryToDelete,
         setCategoryToDelete,
+        isSystemExplanationOpen,
+        setIsSystemExplanationOpen,
         actions: {
             addTask,
             updateTask,
