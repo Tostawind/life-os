@@ -29,6 +29,7 @@ export function useLifeOS() {
     const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
     const [isSystemExplanationOpen, setIsSystemExplanationOpen] = useState(false);
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
 
     useEffect(() => {
         localStorage.setItem("lifeos_v9_6_data", JSON.stringify(data));
@@ -243,6 +244,31 @@ export function useLifeOS() {
         setProcessingTask(null);
     };
 
+    const cleanupCompletedTasks = () => {
+        setData((prev) => {
+            const newTasks = prev.tasks.reduce((acc, task) => {
+                if (task.status === "active" && task.completed) {
+                    if (task.projectId) {
+                        // Project task: Remove from Today (set to pending) but keep
+                        acc.push({ ...task, status: "pending" });
+                    } else {
+                        // Loose task: Delete (do not push)
+                    }
+                } else {
+                    acc.push(task);
+                }
+                return acc;
+            }, []);
+            return { ...prev, tasks: newTasks };
+        });
+    };
+
+    const requestClearCompleted = () => setShowClearConfirm(true);
+    const confirmClearCompleted = () => {
+        cleanupCompletedTasks();
+        setShowClearConfirm(false);
+    };
+
     const getGoalProgress = (goalId) => {
         const goalProjectIds = data.projects
             .filter((p) => p.goalId === goalId)
@@ -329,6 +355,8 @@ export function useLifeOS() {
         setCategoryToDelete,
         isSystemExplanationOpen,
         setIsSystemExplanationOpen,
+        showClearConfirm,
+        setShowClearConfirm,
         actions: {
             addTask,
             updateTask,
@@ -357,6 +385,9 @@ export function useLifeOS() {
             confirmImport,
             requestHardReset,
             confirmHardReset,
+            cleanupCompletedTasks,
+            requestClearCompleted,
+            confirmClearCompleted,
             getFilteredTasks,
         },
     };

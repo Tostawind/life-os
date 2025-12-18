@@ -159,3 +159,35 @@ export const ImportConfirmModal = ({ onConfirm, onCancel }) => (
         </Card>
     </div>
 );
+
+export const ClearCompletedConfirmModal = ({ onConfirm, onCancel }) => (
+    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[80] flex items-center justify-center p-4">
+        <Card className="w-full max-w-sm p-6 animate-in zoom-in duration-200">
+            <div className="flex flex-col items-center text-center">
+                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-4 text-amber-600">
+                    <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-800 mb-2">
+                    ¿Limpiar Tareas?
+                </h3>
+                <p className="text-slate-500 text-sm mb-6">
+                    Las tareas simples se borrarán. Las de proyecto se archivarán.
+                </p>
+                <div className="flex gap-3 w-full">
+                    <button
+                        onClick={onCancel}
+                        className="flex-1 py-2 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className="flex-1 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 shadow-lg shadow-indigo-200"
+                    >
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </Card>
+    </div>
+);

@@ -71,8 +71,8 @@ const TaskDetailsModal = ({
                         })
                     }
                     className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${task.status === "active"
-                            ? "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        ? "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                         }`}
                 >
                     {task.status === "active" ? (
@@ -107,8 +107,8 @@ const TaskDetailsModal = ({
                     })
                 }
                 className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${task.status === "active"
-                        ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                        : "bg-indigo-600 text-white hover:bg-indigo-700"
+                    ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    : "bg-indigo-600 text-white hover:bg-indigo-700"
                     }`}
             >
                 {task.status === "active" ? (
@@ -134,8 +134,8 @@ const TaskDetailsModal = ({
                         <button
                             onClick={() => toggleTask(task.id)}
                             className={`w-6 h-6 rounded-full border flex items-center justify-center shrink-0 transition-colors ${task.completed
-                                    ? "bg-indigo-500 border-indigo-500 text-white"
-                                    : "border-slate-300 hover:border-indigo-400"
+                                ? "bg-indigo-500 border-indigo-500 text-white"
+                                : "border-slate-300 hover:border-indigo-400"
                                 }`}
                         >
                             {task.completed && <CheckCircle2 className="w-4 h-4" />}
@@ -144,8 +144,8 @@ const TaskDetailsModal = ({
                             value={task.title}
                             onSave={(val) => updateTask(task.id, { title: val })}
                             className={`text-xl font-bold w-full bg-transparent p-0 border-none focus:ring-0 placeholder-slate-400 truncate ${task.completed
-                                    ? "text-slate-400 line-through"
-                                    : "text-slate-800"
+                                ? "text-slate-400 line-through"
+                                : "text-slate-800"
                                 }`}
                             placeholder="Título de la tarea..."
                         />
@@ -157,8 +157,8 @@ const TaskDetailsModal = ({
                         >
                             <Star
                                 className={`w-6 h-6 ${task.isFavorite
-                                        ? "fill-amber-400 text-amber-400"
-                                        : "text-slate-300"
+                                    ? "fill-amber-400 text-amber-400"
+                                    : "text-slate-300"
                                     }`}
                             />
                         </button>
@@ -191,6 +191,7 @@ const TaskDetailsModal = ({
                                 <StepItem
                                     key={step.id}
                                     step={step}
+                                    index={index + 1}
                                     onUpdate={(updates) => updateStep(task.id, step.id, updates)}
                                     onDelete={() => deleteStep(task.id, step.id)}
                                     onDragStart={(e) => handleDragStart(e, index)}

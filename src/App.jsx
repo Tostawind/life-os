@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Inbox,
   Layout,
@@ -11,6 +11,8 @@ import {
   CheckCircle2,
   Filter,
   PauseCircle,
+  CheckCheck,
+  ChevronDown,
 } from "lucide-react";
 
 import { useLifeOS } from "./hooks/useLifeOS";
@@ -33,6 +35,7 @@ import {
   DeleteCategoryConfirmationModal,
   ResetConfirmModal,
   ImportConfirmModal,
+  ClearCompletedConfirmModal,
 } from "./components/modals/DeleteModals";
 import SystemExplanationModal from "./components/modals/SystemExplanationModal";
 
@@ -44,6 +47,7 @@ const handleInputFocus = (e) => {
 };
 
 export default function LifeOS() {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const {
     data,
     setData, // Exposed for direct manipulation
@@ -75,6 +79,8 @@ export default function LifeOS() {
     setCategoryToDelete,
     isSystemExplanationOpen,
     setIsSystemExplanationOpen,
+    showClearConfirm,
+    setShowClearConfirm,
     actions,
   } = useLifeOS();
 
@@ -107,6 +113,9 @@ export default function LifeOS() {
     confirmImport,
     requestHardReset,
     confirmHardReset,
+    cleanupCompletedTasks,
+    requestClearCompleted,
+    confirmClearCompleted,
     getFilteredTasks,
   } = actions;
 
@@ -193,43 +202,74 @@ export default function LifeOS() {
                   activas
                 </span>
               </header>
-              {/* Filtros - Aligned Right */}
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide w-full justify-start md:justify-end">
-                {[
-                  { id: "all", label: "Todo" },
-                  {
-                    id: "favorites",
-                    label: "Favoritas",
-                    icon: <Star className="w-3 h-3" />,
-                  },
-                  {
-                    id: "project",
-                    label: "Proyectos",
-                    icon: <Layers className="w-3 h-3" />,
-                  },
-                  {
-                    id: "normal",
-                    label: "Simples",
-                    icon: <CheckCircle2 className="w-3 h-3" />,
-                  },
-                ].map((f) => (
+              {/* Filters & Actions */}
+              <div className="flex items-center gap-3 w-full md:w-auto min-w-0 justify-end">
+                {/* Clear Completed Button */}
+                {getFilteredTasks().some(t => t.completed) && (
                   <button
-                    key={f.id}
-                    onClick={() => setTodayFilter(f.id)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors flex items-center gap-1.5 whitespace-nowrap shrink-0 ${todayFilter === f.id
-                      ? "bg-slate-900 text-white border-slate-900"
-                      : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
-                      }`}
+                    onClick={requestClearCompleted}
+                    className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded-lg hover:text-indigo-600 hover:bg-slate-100 transition-colors"
                   >
-                    {f.icon} {f.label}
+                    <CheckCheck className="w-4 h-4" />
+                    Limpiar tareas
                   </button>
-                ))}
+                )}
+
+                {/* Filter Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    onBlur={() => setTimeout(() => setIsFilterOpen(false), 200)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors min-w-[120px] justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      {[
+                        { id: "all", label: "Todo", icon: <Filter className="w-3 h-3" /> },
+                        { id: "favorites", label: "Favoritas", icon: <Star className="w-3 h-3" /> },
+                        { id: "project", label: "Proyectos", icon: <Layers className="w-3 h-3" /> },
+                        { id: "normal", label: "Simples", icon: <CheckCircle2 className="w-3 h-3" /> }
+                      ].find(f => f.id === todayFilter)?.icon}
+                      {[
+                        { id: "all", label: "Todo" },
+                        { id: "favorites", label: "Favoritas" },
+                        { id: "project", label: "Proyectos" },
+                        { id: "normal", label: "Simples" }
+                      ].find(f => f.id === todayFilter)?.label}
+                    </span>
+                    <ChevronDown className={`w-3 h-3 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {isFilterOpen && (
+                    <div className="absolute right-0 top-full mt-1 bg-white border border-slate-100 shadow-xl rounded-xl p-1 z-10 w-40 flex flex-col gap-1 animate-in fade-in slide-in-from-top-2 duration-200">
+                      {[
+                        { id: "all", label: "Todo", icon: <Filter className="w-3 h-3" /> },
+                        { id: "favorites", label: "Favoritas", icon: <Star className="w-3 h-3" /> },
+                        { id: "project", label: "Proyectos", icon: <Layers className="w-3 h-3" /> },
+                        { id: "normal", label: "Simples", icon: <CheckCircle2 className="w-3 h-3" /> },
+                      ].map((f) => (
+                        <button
+                          key={f.id}
+                          onClick={() => {
+                            setTodayFilter(f.id);
+                            setIsFilterOpen(false);
+                          }}
+                          className={`flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg transition-colors w-full text-left ${todayFilter === f.id
+                            ? "bg-slate-100 text-slate-900"
+                            : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                            }`}
+                        >
+                          {f.icon} {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             <Card className="overflow-hidden divide-y divide-slate-100">
               {getFilteredTasks()
-                .sort((a, b) => Number(b.isFavorite) - Number(a.isFavorite))
+                .sort((a, b) => (Number(a.completed) - Number(b.completed)) || (Number(b.isFavorite) - Number(a.isFavorite)))
                 .map((task) => (
                   <TaskItem
                     key={task.id}
@@ -529,6 +569,13 @@ export default function LifeOS() {
         isOpen={isSystemExplanationOpen}
         onClose={() => setIsSystemExplanationOpen(false)}
       />
+
+      {showClearConfirm && (
+        <ClearCompletedConfirmModal
+          onConfirm={confirmClearCompleted}
+          onCancel={() => setShowClearConfirm(false)}
+        />
+      )}
     </div>
   );
 }

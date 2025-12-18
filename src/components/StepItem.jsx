@@ -10,6 +10,7 @@ const StepItem = ({
     onDragOver,
     onDrop,
     isDragging,
+    index,
 }) => {
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
@@ -35,12 +36,12 @@ const StepItem = ({
         >
             <button
                 onClick={() => onUpdate({ completed: !step.completed })}
-                className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${step.completed
-                        ? "bg-indigo-500 border-indigo-500 text-white"
-                        : "border-slate-300 hover:border-indigo-400"
+                className={`w-6 h-6 rounded border flex items-center justify-center shrink-0 transition-colors ${step.completed
+                    ? "bg-indigo-500 border-indigo-500 text-white"
+                    : "border-slate-300 hover:border-indigo-400 text-slate-400 font-bold text-xs"
                     }`}
             >
-                {step.completed && <CheckCircle2 className="w-3.5 h-3.5" />}
+                {step.completed ? <CheckCircle2 className="w-4 h-4" /> : index}
             </button>
 
             <div className="flex-1 min-w-0">
