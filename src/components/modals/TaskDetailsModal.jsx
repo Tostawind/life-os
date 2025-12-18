@@ -130,10 +130,10 @@ const TaskDetailsModal = ({
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
             <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl flex flex-col max-h-[90dvh] animate-in zoom-in duration-200 overflow-hidden">
                 <div className="p-6 border-b border-slate-100 flex items-start justify-between bg-slate-50/50">
-                    <div className="flex-1 mr-4 flex items-center gap-3 min-w-0">
+                    <div className="flex-1 mr-4 flex items-start gap-3 min-w-0">
                         <button
                             onClick={() => toggleTask(task.id)}
-                            className={`w-6 h-6 rounded-full border flex items-center justify-center shrink-0 transition-colors ${task.completed
+                            className={`w-6 h-6 rounded-full border flex items-center justify-center shrink-0 transition-colors mt-1 ${task.completed
                                 ? "bg-indigo-500 border-indigo-500 text-white"
                                 : "border-slate-300 hover:border-indigo-400"
                                 }`}
@@ -143,7 +143,7 @@ const TaskDetailsModal = ({
                         <AutoSaveInput
                             value={task.title}
                             onSave={(val) => updateTask(task.id, { title: val })}
-                            className={`text-xl font-bold w-full bg-transparent p-0 border-none focus:ring-0 placeholder-slate-400 truncate ${task.completed
+                            className={`text-xl font-bold w-full bg-transparent p-0 border-none focus:ring-0 placeholder-slate-400 break-words ${task.completed
                                 ? "text-slate-400 line-through"
                                 : "text-slate-800"
                                 }`}

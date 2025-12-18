@@ -87,15 +87,15 @@ const ProjectCard = ({
             >
                 <div className="flex-1 mr-4 min-w-0">
                     {/* Project Title Row */}
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-start gap-2 mb-1">
                         {isActive ? (
                             <PlayCircle
-                                className="w-4 h-4 text-emerald-500 shrink-0"
+                                className="w-4 h-4 text-emerald-500 shrink-0 mt-1"
                                 title="Proyecto Activo"
                             />
                         ) : (
                             <PauseCircle
-                                className="w-4 h-4 text-slate-400 shrink-0"
+                                className="w-4 h-4 text-slate-400 shrink-0 mt-1"
                                 title="Proyecto en Incubadora"
                             />
                         )}
@@ -103,7 +103,7 @@ const ProjectCard = ({
                         <AutoSaveInput
                             value={project.title}
                             onSave={(val) => onUpdateProject({ title: val })}
-                            className={`font-bold w-full text-base bg-transparent p-0 border-none truncate ${isActive ? "text-slate-700" : "text-slate-500"
+                            className={`font-bold w-full text-base bg-transparent p-0 border-none break-words ${isActive ? "text-slate-700" : "text-slate-500"
                                 }`}
                             placeholder="Nombre del proyecto..."
                         />

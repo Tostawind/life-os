@@ -59,8 +59,8 @@ const TaskItem = ({
                             onToggle(task.id);
                         }}
                         className={`shrink-0 transition-colors ${task.completed
-                                ? "text-indigo-500"
-                                : "text-slate-300 hover:text-indigo-500"
+                            ? "text-indigo-500"
+                            : "text-slate-300 hover:text-indigo-500"
                             }`}
                     >
                         {task.completed ? (
@@ -75,9 +75,9 @@ const TaskItem = ({
                         onClick={() => onClick(task)}
                     >
                         <span
-                            className={`font-medium text-base truncate block ${task.completed
-                                    ? "line-through text-slate-400"
-                                    : "text-slate-800"
+                            className={`font-medium text-base block break-words ${task.completed
+                                ? "line-through text-slate-400"
+                                : "text-slate-800"
                                 }`}
                         >
                             {task.title}
@@ -96,8 +96,8 @@ const TaskItem = ({
                         >
                             <Star
                                 className={`w-5 h-5 ${task.isFavorite
-                                        ? "fill-amber-400 text-amber-400"
-                                        : "text-slate-300"
+                                    ? "fill-amber-400 text-amber-400"
+                                    : "text-slate-300"
                                     }`}
                             />
                         </button>
@@ -126,12 +126,12 @@ const TaskItem = ({
                     {showContextTags && project && (
                         <>
                             {goal && (
-                                <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200 font-bold uppercase tracking-wider flex items-center gap-1 max-w-full truncate">
-                                    <Target className="w-3 h-3 shrink-0" /> {goal.title}
+                                <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200 font-bold uppercase tracking-wider flex items-start gap-1 max-w-full break-words text-left">
+                                    <Target className="w-3 h-3 shrink-0 mt-[0.15rem]" /> <span className="flex-1">{goal.title}</span>
                                 </span>
                             )}
-                            <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded border border-indigo-100 font-bold uppercase tracking-wider flex items-center gap-1 max-w-full truncate">
-                                <Layers className="w-3 h-3 shrink-0" /> {project.title}
+                            <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded border border-indigo-100 font-bold uppercase tracking-wider flex items-start gap-1 max-w-full break-words text-left">
+                                <Layers className="w-3 h-3 shrink-0 mt-[0.15rem]" /> <span className="flex-1">{project.title}</span>
                             </span>
                         </>
                     )}

@@ -27,7 +27,7 @@ const StepItem = ({
 
     return (
         <div
-            className={`flex items-center gap-3 py-2 group ${isDragging ? "opacity-50 bg-slate-50" : ""
+            className={`flex items-start gap-3 py-2 group ${isDragging ? "opacity-50 bg-slate-50" : ""
                 }`}
             draggable
             onDragStart={onDragStart}
@@ -48,7 +48,7 @@ const StepItem = ({
                 <AutoSaveInput
                     value={step.title}
                     onSave={(val) => onUpdate({ title: val })}
-                    className={`w-full text-sm truncate ${step.completed ? "text-slate-400 line-through" : "text-slate-700"
+                    className={`w-full text-sm break-words ${step.completed ? "text-slate-400 line-through" : "text-slate-700"
                         }`}
                 />
             </div>

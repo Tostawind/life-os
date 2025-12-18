@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // --- Helper para UX Móvil (Global) ---
 const handleInputFocus = (e) => {
@@ -9,10 +9,19 @@ const handleInputFocus = (e) => {
 
 const AutoSaveInput = ({ value, onSave, className = "", placeholder = "" }) => {
     const [text, setText] = useState(value);
+    const textareaRef = useRef(null);
 
     useEffect(() => {
         setText(value);
     }, [value]);
+
+    // Auto-resize textarea
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+            textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
+        }
+    }, [text]);
 
     const handleBlur = () => {
         if (text !== value) {
@@ -21,20 +30,23 @@ const AutoSaveInput = ({ value, onSave, className = "", placeholder = "" }) => {
     };
 
     const handleKeyDown = (e) => {
-        if (e.key === "Enter") {
-            e.target.blur(); // Trigger blur to save
+        if (e.key === "Enter" && !e.shiftKey) { // Allow Shift+Enter for new lines, Enter to save
+            e.preventDefault();
+            e.target.blur();
         }
     };
 
     return (
-        <input
+        <textarea
+            ref={textareaRef}
+            rows={1}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             onFocus={handleInputFocus}
             onClick={(e) => e.stopPropagation()}
-            className={`bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-100 rounded px-1 transition-all ${className}`}
+            className={`bg-transparent focus:outline-none focus:ring-2 focus:ring-indigo-100 rounded px-1 transition-all resize-none overflow-hidden block ${className}`}
             placeholder={placeholder}
         />
     );
