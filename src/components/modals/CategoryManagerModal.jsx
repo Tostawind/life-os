@@ -32,6 +32,8 @@ const CategoryManagerModal = ({
     handleImportRequest, // Expects onChange event
     requestHardReset,
     onOpenSystemExplanation,
+    user,
+    handleLogout,
 }) => {
     if (!isOpen) return null;
     const [newCat, setNewCat] = useState("");
@@ -49,6 +51,36 @@ const CategoryManagerModal = ({
                 </div>
 
                 <div className="overflow-y-auto flex-1 pr-1">
+                    {/* User Profile Section */}
+                    {user && (
+                        <div className="mb-4 p-2 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full overflow-hidden border border-white shadow-sm shrink-0">
+                                    {user.photoURL ? (
+                                        <img
+                                            src={user.photoURL}
+                                            alt={user.displayName}
+                                            className="w-full h-full object-cover"
+                                            referrerPolicy="no-referrer"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-[10px]">
+                                            {user.displayName ? user.displayName[0] : "U"}
+                                        </div>
+                                    )}
+                                </div>
+                                <span className="text-xs font-bold text-slate-700 truncate max-w-[120px]">
+                                    {user.displayName || user.email}
+                                </span>
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="text-[10px] font-bold text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded transition-colors"
+                            >
+                                Log out
+                            </button>
+                        </div>
+                    )}
                     <div className="mb-6">
                         <button
                             onClick={() => setIsCategoriesExpanded(!isCategoriesExpanded)}

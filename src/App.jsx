@@ -39,6 +39,9 @@ import {
 } from "./components/modals/DeleteModals";
 import SystemExplanationModal from "./components/modals/SystemExplanationModal";
 
+import LoginPage from "./components/LoginPage";
+import Toast from "./components/ui/Toast";
+
 // UX Helper for Focus (used in inline form)
 const handleInputFocus = (e) => {
   setTimeout(() => {
@@ -81,8 +84,16 @@ export default function LifeOS() {
     setIsSystemExplanationOpen,
     showClearConfirm,
     setShowClearConfirm,
+    // Auth
+    user,
+    isAuthChecking,
+    handleLogin,
+    handleLogout,
+
     actions,
   } = useLifeOS();
+
+  const [toast, setToast] = useState(null);
 
   // Deconstruct actions for easier usage
   const {
@@ -134,21 +145,51 @@ export default function LifeOS() {
     setData((prev) => ({ ...prev, tasks: [...prev.tasks, newTask] }));
   };
 
+  // --- DATA VALIDATION ---
+  const validateDataStructure = (data) => {
+    if (!data || typeof data !== "object") return false;
+    // Check required arrays
+    const requiredKeys = ["categories", "goals", "projects", "tasks"];
+    const hasAllKeys = requiredKeys.every((key) => Array.isArray(data[key]));
+    return hasAllKeys;
+  };
+
   // Logic to handle file import request (FileReader)
   const handleImportRequest = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Reset input value to allow selecting same file again
+    e.target.value = null;
+
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const importedData = JSON.parse(event.target.result);
-        setPendingImportData(importedData);
+
+        if (validateDataStructure(importedData)) {
+          setPendingImportData(importedData); // Opens confirmation via state
+        } else {
+          setToast({ type: "error", message: "El archivo no tiene una estructura válida." });
+        }
       } catch (error) {
-        alert("Error al leer archivo.");
+        setToast({ type: "error", message: "Error al leer el archivo JSON." });
       }
     };
     reader.readAsText(file);
   };
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-32 md:pb-12">
@@ -176,12 +217,14 @@ export default function LifeOS() {
             />
             <Inbox className="w-5 h-5 text-slate-400 absolute left-3 top-3" />
           </form>
-          <button
-            onClick={() => setIsCategoryManagerOpen(true)}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
-          >
-            <Settings className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsCategoryManagerOpen(true)}
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+            >
+              <Settings className="w-6 h-6" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -550,6 +593,8 @@ export default function LifeOS() {
         handleImportRequest={handleImportRequest}
         requestHardReset={requestHardReset}
         onOpenSystemExplanation={() => setIsSystemExplanationOpen(true)}
+        user={user}
+        handleLogout={handleLogout}
       />
 
       {showResetConfirm && (
@@ -576,6 +621,8 @@ export default function LifeOS() {
           onCancel={() => setShowClearConfirm(false)}
         />
       )}
+
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   );
 }

@@ -1,4 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import {
+    signInWithPopup,
+    GoogleAuthProvider,
+    signOut,
+    onAuthStateChanged
+} from "firebase/auth";
+import {
+    doc,
+    onSnapshot,
+    setDoc,
+    getDoc
+} from "firebase/firestore";
+import { auth, db } from "../firebase";
 
 const INITIAL_DATA = {
     categories: ["Profesional", "Salud", "Desarrollo Personal", "Otros"],
@@ -12,6 +25,91 @@ export function useLifeOS() {
         const saved = localStorage.getItem("lifeos_v9_6_data");
         return saved ? JSON.parse(saved) : INITIAL_DATA;
     });
+
+    // --- FIREBASE STATE ---
+    const [user, setUser] = useState(null);
+    const [isAuthChecking, setIsAuthChecking] = useState(true);
+    const isRemoteUpdate = useRef(false);
+    const saveTimeout = useRef(null);
+
+    // --- AUTH & SYNC ---
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setIsAuthChecking(false);
+            if (currentUser) {
+                // Check if user has data in Firestore
+                const docRef = doc(db, "users", currentUser.uid);
+                getDoc(docRef).then((snap) => {
+                    if (snap.exists()) {
+                        // User exists, pull data (this will be handled by onSnapshot)
+                    } else {
+                        // New user, upload local data as initial seed
+                        setDoc(docRef, data);
+                    }
+                });
+            }
+        });
+        return () => unsubscribe();
+    }, []); // Run once on mount (depend on auth internal state)
+
+    // Sync FROM Firestore
+    useEffect(() => {
+        if (!user) return;
+        const docRef = doc(db, "users", user.uid);
+        const unsubscribe = onSnapshot(docRef, (doc) => {
+            if (doc.exists()) {
+                const cloudData = doc.data();
+                // Prevent local save loop
+                isRemoteUpdate.current = true;
+                setData(cloudData);
+                // Reset flag after render cycle (approx)
+                setTimeout(() => { isRemoteUpdate.current = false; }, 100);
+            }
+        });
+        return () => unsubscribe();
+    }, [user]);
+
+    // Sync TO Firestore (Save)
+    useEffect(() => {
+        // Always save to localStorage as backup/offline cache
+        localStorage.setItem("lifeos_v9_6_data", JSON.stringify(data));
+
+        if (!user) return;
+        if (isRemoteUpdate.current) return;
+
+        // Debounce cloud writes to save bandwidth/reads
+        if (saveTimeout.current) clearTimeout(saveTimeout.current);
+
+        saveTimeout.current = setTimeout(() => {
+            const docRef = doc(db, "users", user.uid);
+            setDoc(docRef, data, { merge: true }); // Merge true just in case, though we usually overwrite full state structure
+        }, 1000); // 1s delay
+
+    }, [data, user]);
+
+
+    // --- AUTH ACTIONS ---
+    const handleLogin = async () => {
+        try {
+            const provider = new GoogleAuthProvider();
+            await signInWithPopup(auth, provider);
+        } catch (error) {
+            console.error("Login failed", error);
+            alert("Error al iniciar sesión: " + error.message);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await signOut(auth);
+            // Optional: Clear data or keep local copy? 
+            // Let's keep local copy for now to avoid startling user
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
+    };
+
 
     const [view, setView] = useState("today");
     const [todayFilter, setTodayFilter] = useState("all");
@@ -357,6 +455,12 @@ export function useLifeOS() {
         setIsSystemExplanationOpen,
         showClearConfirm,
         setShowClearConfirm,
+        // Auth
+        user,
+        isAuthChecking,
+        handleLogin,
+        handleLogout,
+
         actions: {
             addTask,
             updateTask,
