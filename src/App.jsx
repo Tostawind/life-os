@@ -87,6 +87,7 @@ export default function LifeOS() {
     // Auth
     user,
     isAuthChecking,
+    isDataLoading,
     handleLogin,
     handleLogout,
 
@@ -189,6 +190,15 @@ export default function LifeOS() {
 
   if (!user) {
     return <LoginPage onLogin={handleLogin} />;
+  }
+
+  if (isDataLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center flex-col gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <p className="text-slate-500 font-medium animate-pulse">Sincronizando...</p>
+      </div>
+    );
   }
 
   return (
@@ -563,24 +573,30 @@ export default function LifeOS() {
         onOpenCategoryManager={() => setIsCategoryManagerOpen(true)}
       />
 
-      {taskToDelete && (
-        <DeleteConfirmationModal
-          onDelete={confirmDeleteTask}
-          onCancel={() => setTaskToDelete(null)}
-        />
-      )}
-      {projectToDelete && (
-        <DeleteProjectConfirmationModal
-          onDelete={confirmDeleteProject}
-          onCancel={() => setProjectToDelete(null)}
-        />
-      )}
-      {categoryToDelete && (
-        <DeleteCategoryConfirmationModal
-          onDelete={confirmDeleteCategory}
-          onCancel={() => setCategoryToDelete(null)}
-        />
-      )}
+      {
+        taskToDelete && (
+          <DeleteConfirmationModal
+            onDelete={confirmDeleteTask}
+            onCancel={() => setTaskToDelete(null)}
+          />
+        )
+      }
+      {
+        projectToDelete && (
+          <DeleteProjectConfirmationModal
+            onDelete={confirmDeleteProject}
+            onCancel={() => setProjectToDelete(null)}
+          />
+        )
+      }
+      {
+        categoryToDelete && (
+          <DeleteCategoryConfirmationModal
+            onDelete={confirmDeleteCategory}
+            onCancel={() => setCategoryToDelete(null)}
+          />
+        )
+      }
 
       <CategoryManagerModal
         isOpen={isCategoryManagerOpen}
@@ -597,32 +613,38 @@ export default function LifeOS() {
         handleLogout={handleLogout}
       />
 
-      {showResetConfirm && (
-        <ResetConfirmModal
-          onConfirm={confirmHardReset}
-          onCancel={() => setShowResetConfirm(false)}
-        />
-      )}
-      {pendingImportData && (
-        <ImportConfirmModal
-          onConfirm={confirmImport}
-          onCancel={() => setPendingImportData(null)}
-        />
-      )}
+      {
+        showResetConfirm && (
+          <ResetConfirmModal
+            onConfirm={confirmHardReset}
+            onCancel={() => setShowResetConfirm(false)}
+          />
+        )
+      }
+      {
+        pendingImportData && (
+          <ImportConfirmModal
+            onConfirm={confirmImport}
+            onCancel={() => setPendingImportData(null)}
+          />
+        )
+      }
 
       <SystemExplanationModal
         isOpen={isSystemExplanationOpen}
         onClose={() => setIsSystemExplanationOpen(false)}
       />
 
-      {showClearConfirm && (
-        <ClearCompletedConfirmModal
-          onConfirm={confirmClearCompleted}
-          onCancel={() => setShowClearConfirm(false)}
-        />
-      )}
+      {
+        showClearConfirm && (
+          <ClearCompletedConfirmModal
+            onConfirm={confirmClearCompleted}
+            onCancel={() => setShowClearConfirm(false)}
+          />
+        )
+      }
 
       <Toast toast={toast} onClose={() => setToast(null)} />
-    </div>
+    </div >
   );
 }

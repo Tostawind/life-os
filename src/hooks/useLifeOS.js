@@ -21,34 +21,22 @@ const INITIAL_DATA = {
 };
 
 export function useLifeOS() {
-    const [data, setData] = useState(() => {
-        const saved = localStorage.getItem("lifeos_v9_6_data");
-        return saved ? JSON.parse(saved) : INITIAL_DATA;
-    });
+    const [data, setData] = useState(null);
+    const [isDataLoading, setIsDataLoading] = useState(true);
 
     // --- FIREBASE STATE ---
     const [user, setUser] = useState(null);
     const [isAuthChecking, setIsAuthChecking] = useState(true);
     const isRemoteUpdate = useRef(false);
     const saveTimeout = useRef(null);
+    const dbReady = useRef(false);
 
     // --- AUTH & SYNC ---
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
             setIsAuthChecking(false);
-            if (currentUser) {
-                // Check if user has data in Firestore
-                const docRef = doc(db, "users", currentUser.uid);
-                getDoc(docRef).then((snap) => {
-                    if (snap.exists()) {
-                        // User exists, pull data (this will be handled by onSnapshot)
-                    } else {
-                        // New user, upload local data as initial seed
-                        setDoc(docRef, data);
-                    }
-                });
-            }
+            dbReady.current = false; // Block writes until we verify source
         });
         return () => unsubscribe();
     }, []); // Run once on mount (depend on auth internal state)
@@ -57,33 +45,47 @@ export function useLifeOS() {
     useEffect(() => {
         if (!user) return;
         const docRef = doc(db, "users", user.uid);
-        const unsubscribe = onSnapshot(docRef, (doc) => {
-            if (doc.exists()) {
-                const cloudData = doc.data();
+        let isFirstSync = true;
+
+        const unsubscribe = onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const cloudData = docSnap.data();
                 // Prevent local save loop
                 isRemoteUpdate.current = true;
                 setData(cloudData);
+                dbReady.current = true; // Sync established, safe to write future changes
+
                 // Reset flag after render cycle (approx)
                 setTimeout(() => { isRemoteUpdate.current = false; }, 100);
+                setIsDataLoading(false);
+            } else {
+                // No data in cloud.
+                if (isFirstSync) {
+                    setDoc(docRef, INITIAL_DATA);
+                    setData(INITIAL_DATA);
+                    dbReady.current = true; // Safe to continue
+                    setIsDataLoading(false);
+                }
             }
+            isFirstSync = false;
         });
         return () => unsubscribe();
     }, [user]);
 
     // Sync TO Firestore (Save)
     useEffect(() => {
-        // Always save to localStorage as backup/offline cache
-        localStorage.setItem("lifeos_v9_6_data", JSON.stringify(data));
-
         if (!user) return;
+
         if (isRemoteUpdate.current) return;
+        if (!dbReady.current) return; // Prevent overwriting cloud data before sync
+        if (!data) return; // Don't save if data is null
 
         // Debounce cloud writes to save bandwidth/reads
         if (saveTimeout.current) clearTimeout(saveTimeout.current);
 
         saveTimeout.current = setTimeout(() => {
             const docRef = doc(db, "users", user.uid);
-            setDoc(docRef, data, { merge: true }); // Merge true just in case, though we usually overwrite full state structure
+            setDoc(docRef, data, { merge: true });
         }, 1000); // 1s delay
 
     }, [data, user]);
@@ -458,6 +460,7 @@ export function useLifeOS() {
         // Auth
         user,
         isAuthChecking,
+        isDataLoading,
         handleLogin,
         handleLogout,
 
