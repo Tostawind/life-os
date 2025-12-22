@@ -1,8 +1,25 @@
 # 🏔️ Life OS Minimalista
 
-> "La claridad precede a la competencia."Este no es solo un gestor de tareas; es un sistema operativo para alinear tu día a día con tus objetivos a largo plazo, diseñado para reducir la fricción y aumentar el foco.
+> "La claridad precede a la competencia."
+> Este no es solo un gestor de tareas; es un sistema operativo para alinear tu día a día con tus objetivos a largo plazo, diseñado para reducir la fricción y aumentar el foco.
 
-- Web: https://life-os-lemon.vercel.app/
+- **Web App:** https://life-os-lemon.vercel.app/
+
+---
+
+## 🔥 Novedades v2.0: Arquitectura Cloud & PWA
+
+### ☁️ Sincronización Real (Firebase)
+El sistema ha migrado de `localStorage` a **Google Firebase**.
+- **Base de Datos en la Nube:** Tus datos viven en Firestore. Inicia sesión en tu móvil, tablet o PC y verás exactamente lo mismo.
+- **Fuente de Verdad:** La nube siempre manda. Al iniciar sesión, el sistema descarga tu última versión. Ya no hay riesgo de sobrescribir datos antiguos con versiones locales obsoletas.
+- **Login Seguro:** Autenticación mediante Google (Gmail).
+
+### 📱 Aplicación Web Progresiva (PWA)
+- **Instalable:** Puedes instalar LifeOS como una "app nativa" en tu móvil (iOS/Android) o PC (Chrome/Edge).
+- Icono en pantalla de inicio y experiencia pantalla completa (sin barra de navegador).
+
+---
 
 ## 🧠 Parte 1: Filosofía y Flujo de Trabajo
 
@@ -12,124 +29,67 @@ El sistema se basa en la metodología **PARA** (Projects, Areas, Resources, Arch
 
 El sistema organiza tu vida en tres niveles de altitud:
 
-1. **🎯 Metas (El Norte):** Son tus grandes objetivos a medio/largo plazo (ej: "Libertad Financiera", "Cuerpo Atlético").
+1.  **🎯 Metas (El Norte):** Son tus grandes objetivos a medio/largo plazo (ej: "Libertad Financiera", "Cuerpo Atlético").
+    -   **Categorías:** Ayudan a equilibrar las áreas de tu vida (Profesional, Salud, Personal...).
+    -   **Estado:** Pueden estar **Activas** o en la **Incubadora** (pausadas para no distraer).
 
-- Categorías: Ayudan a equilibrar las áreas de tu vida (Profesional, Salud, Personal...).
-- Estado: Pueden estar **Activas** o en la **Incubadora** (pausadas para no distraer).
+2.  **🏗️ Proyectos (El Puente):** Son conjuntos de acciones concretas necesarias para lograr una Meta (ej: "Lanzar Web Personal", "Plan de Entrenamiento 5k").
+    -   Un proyecto siempre pertenece a una Meta.
+    -   También pueden enviarse a la **Incubadora**.
 
-2. **🏗️ Proyectos (El Puente):** Son conjuntos de acciones concretas necesarias para lograr una Meta (ej: "Lanzar Web Personal", "Plan de Entrenamiento 5k").
-
-- Un proyecto siempre pertenece a una Meta.
-- También pueden enviarse a la **Incubadora**.
-
-3. **⚡ Tareas (La Acción):** La unidad mínima de trabajo.
-
-- Siguiente Paso: La primera tarea no completada de un proyecto se destaca automáticamente como el "siguiente paso inmediato".
+3.  **⚡ Tareas (La Acción):** La unidad mínima de trabajo.
+    -   **Siguiente Paso:** La primera tarea no completada de un proyecto se destaca automáticamente.
+    -   **Multilínea:** Los títulos largos ahora se leen completos, sin cortes.
 
 ### 2. Los 4 Espacios de Trabajo
 
-- **📦 El Baúl (Inbox):**
-  - Tu cerebro es para tener ideas, no para almacenarlas.
-  - Todo lo que se te ocurra, escríbelo arriba ("¿Qué tienes en mente?"). Cae aquí.
-  - **Regla de Oro:** Procesa el Baúl al final del día. Decide si es una tarea para Hoy, si va a un Proyecto o si es un Deseo.
-- **☀️ Hoy (Action Board):**
-  - Tu foco láser. Aquí solo debe haber lo que vas a completar hoy.
-  - **Sin ruido:** Las tareas de proyectos no aparecen aquí automáticamente; tú decides conscientemente traerlas ("Activar tarea") cuando vas a trabajar en ellas.
-- **✨ Deseos (Someday/Maybe):**
-  - Cosas que te gustaría hacer "algún día" pero no tienen fecha ni compromiso actual (ej: "Aprender a tocar el ukelele").
-  - Están seguros aquí sin ocupar espacio mental.
+-   **📦 El Baúl (Inbox):**
+    -   Tu cerebro es para tener ideas, no para almacenarlas.
+    -   Botón rápido arriba ("¿Qué tienes en mente?"). Todo cae aquí.
+    -   **Procesar:** Usa el botón flotante para decidir: ¿Es para Hoy? ¿Es de un Proyecto? ¿Es un Deseo?
 
-## 💾 Parte 2: Modelo de Datos (JSON)
+-   **☀️ Hoy (Action Board):**
+    -   Tu foco láser. Aquí solo debe haber lo que vas a completar hoy.
+    -   **Sin ruido:** Las tareas de proyectos no aparecen aquí automáticamente; tú decides conscientemente traerlas ("Activar tarea") cuando vas a trabajar en ellas.
+    -   **Limpieza:** Nuevo botón "Escoba" para archivar rápidamente las tareas completadas.
 
-Toda la información de la aplicación se almacena localmente en un objeto JSON estructurado. Este es el esquema que utiliza el sistema para las funciones de **Copia de Seguridad (Backup) y Restauración**.
+-   **✨ Deseos (Someday/Maybe):**
+    -   Cosas que te gustaría hacer "algún día" pero no tienen fecha ni compromiso actual (ej: "Aprender a tocar el ukelele").
 
-### Estructura General
+---
 
-El archivo `lifeos_backup.json` contiene un único objeto raíz con 4 arrays principales:
+## 💾 Parte 2: Modelo de Datos (Backup/Export)
 
-ClaveTipoDescripcióncategoriesArray<String>Lista simple de etiquetas para clasificar metas.goalsArray<Object>Tus grandes objetivos.projectsArray<Object>Contenedores de tareas vinculados a metas.tasksArray<Object>Todas las tareas (sueltas, de proyecto, deseos, inbox).
+Aunque la app usa Firebase, mantenemos la capacidad de **Exportar/Importar** tus datos en formato JSON para que siempre seas dueño de tu información.
 
-#### Ejemplo de JSON Completo
+### Estructura de Exportación
 
+El archivo `lifeos_backup.json` contiene un único objeto raíz:
+
+| Clave | Tipo | Descripción |
+| :--- | :--- | :--- |
+| `categories` | `Array<String>` | Lista simple de etiquetas para clasificar metas. |
+| `goals` | `Array<Object>` | Tus grandes objetivos. |
+| `projects` | `Array<Object>` | Contenedores de tareas vinculados a metas. |
+| `tasks` | `Array<Object>` | Todas las tareas (sueltas, de proyecto, deseos, inbox). |
+
+#### Ejemplo de Estructura de Tarea
 ```json
 {
-  "categories": ["Profesional", "Salud", "Desarrollo Personal", "Otros"],
-  "goals": [
-    {
-      "id": "g1709392811",
-      "title": "Libertad Financiera",
-      "description": "Generar 4000€/mes pasivos",
-      "category": "Profesional",
-      "status": "active"
-      // status: 'active' | 'incubator'
-    }
-  ],
-  "projects": [
-    {
-      "id": "p1709399123",
-      "title": "Lanzar Curso Online",
-      "goalId": "g1709392811",
-      "status": "active",
-      "active": true // Deprecated (legacy)
-    }
-  ],
-  "tasks": [
-    {
-      "id": "t1709400001",
-      "title": "Comprar dominio web",
-      "type": "project",
-      // type: 'normal' (suelta) | 'project' (vinculada)
-
-      "status": "pending",
-      // status:
-      // 'inbox'   -> En el Baúl
-      // 'active'  -> En la vista "Hoy"
-      // 'pending' -> Guardada en proyecto (oculta de Hoy)
-      // 'wish'    -> En Deseos
-
-      "completed": false,
-      "isFavorite": true,
-      "projectId": "p1709399123", // ID del proyecto padre (si aplica)
-      "steps": [
-        {
-          "id": "s1",
-          "title": "Buscar nombres disponibles",
-          "completed": true
-        },
-        {
-          "id": "s2",
-          "title": "Comparar precios",
-          "completed": false
-        }
-      ]
-    },
-    {
-      "id": "t1709400002",
-      "title": "Llamar al dentista",
-      "type": "normal",
-      "status": "inbox",
-      "completed": false,
-      "isFavorite": false,
-      "steps": []
-    }
+  "id": "t1709400001",
+  "title": "Comprar dominio web",
+  "type": "project", // 'normal' | 'project'
+  "status": "pending", // 'inbox' | 'active' | 'pending' | 'wish'
+  "completed": false,
+  "isFavorite": true,
+  "projectId": "p1709399123", // Si pertenece a un proyecto
+  "steps": [
+    { "id": "s1", "title": "Subtarea 1", "completed": true }
   ]
 }
 ```
 
-#### Relaciones Clave
-
-1. **Meta -> Proyecto:**
-
-- Se unen mediante `goalId` en el objeto del proyecto.
-- Si borras una Meta, la lógica visual debería avisarte o gestionar los proyectos huérfanos (actualmente se recomienda borrar proyectos antes que la meta).
-
-2. **Proyecto -> Tarea:**
-
-- Se unen mediante `projectId` en el objeto de la tarea.
-- `type` debe ser `"project"`.
-- Si `status` es `"active"`, la tarea se ve en **Hoy** Y en el **Proyecto**.
-- Si `status` es `"pending"`, la tarea solo se ve dentro del **Proyecto**.
-
-3. **Categoría -> Meta:**
-
-   - Es una relación débil por _string_ simple. Si cambias el nombre de una categoría en la configuración, el sistema busca todas las metas con ese _string_ y las actualiza.
+### Notas Técnicas
+- **Toast Notifications:** Sistema de alertas animadas para confirmar acciones.
+- **Modales:** Diseño responsive mejorado para móvil.
+- **Configuración:** La gestión de categorías y el reseteo de cuenta ("Hard Reset") se encuentran en el icono de engranaje.

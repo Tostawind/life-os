@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeFirestore, persistentLocalCache } from "firebase/firestore";
 
 // Tu configuración real de life-os-wind
 const firebaseConfig = {
@@ -17,4 +17,6 @@ const app = initializeApp(firebaseConfig);
 
 // Exportamos las herramientas para que la app las use
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const db = initializeFirestore(app, {
+    localCache: persistentLocalCache()
+});
