@@ -189,8 +189,7 @@ const ProjectCard = ({
             {/* Task List & Form (Collapsible) */}
             {isExpanded && (
                 <div
-                    className={`divide-y divide-slate-100 animate-in slide-in-from-top-2 duration-200 ${!isActive ? "opacity-60" : ""
-                        }`}
+                    className="divide-y divide-slate-100 animate-in slide-in-from-top-2 duration-200"
                 >
                     {tasks.map((task, index) => (
                         <TaskItem

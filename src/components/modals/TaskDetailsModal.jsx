@@ -7,6 +7,8 @@ import {
     Plus,
     Inbox,
     Sun,
+    Layers,
+    Target,
 } from "lucide-react";
 import AutoSaveInput from "../ui/AutoSaveInput";
 import ProgressBar from "../ui/ProgressBar";
@@ -35,6 +37,7 @@ const TaskDetailsModal = ({
     if (!task) return null;
 
     const [draggingStepIndex, setDraggingStepIndex] = useState(null);
+    const [isProjectSelectorOpen, setIsProjectSelectorOpen] = useState(false);
 
     const progress =
         !task.steps || task.steps.length === 0
@@ -43,6 +46,11 @@ const TaskDetailsModal = ({
                 current: task.steps.filter((s) => s.completed).length,
                 total: task.steps.length,
             };
+
+    const project = task.projectId
+        ? data.projects.find((p) => p.id === task.projectId)
+        : null;
+    const goal = project ? data.goals.find((g) => g.id === project.goalId) : null;
 
     const handleDragStart = (e, index) => {
         setDraggingStepIndex(index);
@@ -61,32 +69,123 @@ const TaskDetailsModal = ({
         setDraggingStepIndex(null);
     };
 
+    const handleMoveToProject = (projectId) => {
+        // If it was in inbox, move to pending (project backlog).
+        // If it was active (My Day), keep it active but associate with project.
+        const newStatus = task.status === "inbox" ? "pending" : task.status;
+        updateTask(task.id, { projectId, status: newStatus });
+        setIsProjectSelectorOpen(false);
+    };
+
+    const handleRemoveFromProject = () => {
+        updateTask(task.id, { projectId: null, status: "inbox" });
+    };
+
+    const renderProjectSelector = () => {
+        // Group projects by goal
+        const projectsByGoal = data.projects.reduce((acc, project) => {
+            const goalId = project.goalId || 'uncategorized';
+            if (!acc[goalId]) acc[goalId] = [];
+            acc[goalId].push(project);
+            return acc;
+        }, {});
+
+        return (
+            <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2">
+                <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-bold text-slate-700">Seleccionar Proyecto</h4>
+                    <button
+                        onClick={() => setIsProjectSelectorOpen(false)}
+                        className="text-xs text-slate-500 hover:text-slate-800"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+                <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-1">
+                    {data.goals.map(goal => {
+                        const goalProjects = projectsByGoal[goal.id];
+                        if (!goalProjects || goalProjects.length === 0) return null;
+
+                        return (
+                            <div key={goal.id} className="space-y-1">
+                                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 sticky top-0 bg-white/90 backdrop-blur-sm z-10 py-1">
+                                    {goal.title}
+                                </h5>
+                                {goalProjects.map(project => (
+                                    <button
+                                        key={project.id}
+                                        onClick={() => handleMoveToProject(project.id)}
+                                        className="w-full flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 transition-colors text-left group"
+                                    >
+                                        <Layers className="w-4 h-4 shrink-0 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                                        <span className="truncate font-medium text-sm leading-tight">{project.title}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        );
+                    })}
+
+                    {/* Handle projects without existing goal if any */}
+                    {projectsByGoal['uncategorized'] && projectsByGoal['uncategorized'].length > 0 && (
+                        <div className="space-y-1">
+                            <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Sin Meta</h5>
+                            {projectsByGoal['uncategorized'].map(project => (
+                                <button
+                                    key={project.id}
+                                    onClick={() => handleMoveToProject(project.id)}
+                                    className="w-full flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-indigo-50 hover:text-indigo-700 transition-colors text-left group"
+                                >
+                                    <Layers className="w-4 h-4 shrink-0 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                                    <span className="truncate font-medium text-sm leading-tight">{project.title}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {data.projects.length === 0 && (
+                        <p className="text-sm text-slate-400 p-2 text-center">No hay proyectos</p>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     const renderActionButton = () => {
+        if (isProjectSelectorOpen) return renderProjectSelector();
+
         if (task.projectId) {
             return (
-                <button
-                    onClick={() =>
-                        updateTask(task.id, {
-                            status: task.status === "active" ? "pending" : "active",
-                        })
-                    }
-                    className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${task.status === "active"
-                        ? "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                        }`}
-                >
-                    {task.status === "active" ? (
-                        <>
-                            {" "}
-                            <Sun className="w-5 h-5 fill-indigo-600" /> Quitar de "Mi Día"{" "}
-                        </>
-                    ) : (
-                        <>
-                            {" "}
-                            <Sun className="w-5 h-5" /> Añadir a "Mi Día"{" "}
-                        </>
-                    )}
-                </button>
+                <div className="space-y-2">
+                    <button
+                        onClick={() =>
+                            updateTask(task.id, {
+                                status: task.status === "active" ? "pending" : "active",
+                            })
+                        }
+                        className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${task.status === "active"
+                            ? "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            }`}
+                    >
+                        {task.status === "active" ? (
+                            <>
+                                {" "}
+                                <Sun className="w-5 h-5 fill-indigo-600" /> Quitar de "Mi Día"{" "}
+                            </>
+                        ) : (
+                            <>
+                                {" "}
+                                <Sun className="w-5 h-5" /> Añadir a "Mi Día"{" "}
+                            </>
+                        )}
+                    </button>
+                    <button
+                        onClick={handleRemoveFromProject}
+                        className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors bg-slate-100 text-slate-500 hover:bg-slate-200"
+                    >
+                        <Inbox className="w-5 h-5" /> Mover al Baúl
+                    </button>
+                </div>
             );
         }
         if (task.status === "wish") {
@@ -100,29 +199,37 @@ const TaskDetailsModal = ({
             );
         }
         return (
-            <button
-                onClick={() =>
-                    updateTask(task.id, {
-                        status: task.status === "active" ? "inbox" : "active",
-                    })
-                }
-                className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${task.status === "active"
-                    ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    : "bg-indigo-600 text-white hover:bg-indigo-700"
-                    }`}
-            >
-                {task.status === "active" ? (
-                    <>
-                        {" "}
-                        <Inbox className="w-5 h-5" /> Mover al Baúl{" "}
-                    </>
-                ) : (
-                    <>
-                        {" "}
-                        <Sun className="w-5 h-5" /> Activar Tarea{" "}
-                    </>
-                )}
-            </button>
+            <div className="space-y-2">
+                <button
+                    onClick={() =>
+                        updateTask(task.id, {
+                            status: task.status === "active" ? "inbox" : "active",
+                        })
+                    }
+                    className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${task.status === "active"
+                        ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        : "bg-indigo-600 text-white hover:bg-indigo-700"
+                        }`}
+                >
+                    {task.status === "active" ? (
+                        <>
+                            {" "}
+                            <Inbox className="w-5 h-5" /> Mover al Baúl{" "}
+                        </>
+                    ) : (
+                        <>
+                            {" "}
+                            <Sun className="w-5 h-5" /> Activar Tarea{" "}
+                        </>
+                    )}
+                </button>
+                <button
+                    onClick={() => setIsProjectSelectorOpen(true)}
+                    className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors bg-white border-2 border-slate-100 text-slate-600 hover:bg-slate-50 hover:border-slate-200"
+                >
+                    <Layers className="w-5 h-5" /> Mover a Proyecto
+                </button>
+            </div>
         );
     };
 
@@ -140,15 +247,31 @@ const TaskDetailsModal = ({
                         >
                             {task.completed && <CheckCircle2 className="w-4 h-4" />}
                         </button>
-                        <AutoSaveInput
-                            value={task.title}
-                            onSave={(val) => updateTask(task.id, { title: val })}
-                            className={`text-xl font-bold w-full bg-transparent p-0 border-none focus:ring-0 placeholder-slate-400 break-words ${task.completed
-                                ? "text-slate-400 line-through"
-                                : "text-slate-800"
-                                }`}
-                            placeholder="Título de la tarea..."
-                        />
+                        <div className="w-full">
+                            <AutoSaveInput
+                                value={task.title}
+                                onSave={(val) => updateTask(task.id, { title: val })}
+                                className={`text-xl font-bold w-full bg-transparent p-0 border-none focus:ring-0 placeholder-slate-400 break-words ${task.completed
+                                    ? "text-slate-400 line-through"
+                                    : "text-slate-800"
+                                    }`}
+                                placeholder="Título de la tarea..."
+                            />
+                            {(project || goal) && (
+                                <div className="flex flex-wrap gap-2 mt-1.5">
+                                    {goal && (
+                                        <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200 font-bold uppercase tracking-wider flex items-start gap-1 max-w-full break-words text-left">
+                                            <Target className="w-3 h-3 shrink-0 mt-[0.15rem]" /> <span className="flex-1">{goal.title}</span>
+                                        </span>
+                                    )}
+                                    {project && (
+                                        <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded border border-indigo-100 font-bold uppercase tracking-wider flex items-start gap-1 max-w-full break-words text-left">
+                                            <Layers className="w-3 h-3 shrink-0 mt-[0.15rem]" /> <span className="flex-1">{project.title}</span>
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                         <button
@@ -163,7 +286,10 @@ const TaskDetailsModal = ({
                             />
                         </button>
                         <button
-                            onClick={onClose}
+                            onClick={() => {
+                                onClose();
+                                setIsProjectSelectorOpen(false);
+                            }}
                             className="text-slate-400 hover:text-slate-600 rounded-full p-1 hover:bg-slate-200"
                         >
                             <X className="w-6 h-6" />
